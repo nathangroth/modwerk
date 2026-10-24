@@ -125,3 +125,34 @@ private native image of MODULATION alone with stock FX2 kept
 `0fb6585f…`, never committed), Modwerk's prepared `ot_emu` (`bb17b9ee…`,
 `scripts/prepare-octatrack-emulator.py --build`, six gates passed). Five
 PNGs; the location capture repeated byte for byte across two runs.
+
+### Over the emulated USB (here)
+
+The beta base (identity `56c44acc…`, the site's `CURRENT_BASE`, rebuilt
+from the contributor's 1.40C by `npm run octatrack:base -- --stock … --beta
+--out …`, MAIN `bdae012d…`, never committed) on Modwerk's adapted emulator
+(`scripts/octatrack-emulator/build.py`, `ot_emu` `d940339e…`; its
+`test-idle-range` regression passes; the boot gate creates all ten tasks),
+the contributor's own stock-effects test project staged with
+`tools/emu/ot_emu/stage_card.py`, `--frame --dsp`:
+
+- `scripts/verify-octatrack-dsp-loader.mjs` `pick:modulation` with the
+  0.1.2 package: **module installed** over the emulated USB, **picked on FX1
+  of T1 and of T5** (one track per DSP core, FX1 row 11). Live effect ids
+  FX1 T1..T8 `11 0 0 0 11 0 0 0`; transport errors 0, refused picks 0,
+  completed picks 2; resident words per core `1559, 1559`, the package's
+  size. The script's `check` asserts the FX2 slots (`ids[8]`, `ids[12]`),
+  written for FX2 effects; with those two indices read as FX1 (`ids[0]`,
+  `ids[4]`) in a scratch copy, the rest of its check passes unchanged:
+  **each core holds Modulation's code word for word inside its arena and
+  dispatches to it**.
+- Not run: `remove`, `missing`, `beside` and the other scenarios. They
+  pick and poke FX2 slots, so they do not exercise an FX1-only effect as
+  written. Removal, Undo and the missing-module fallback are left to the
+  hardware run.
+- Emulator evidence only: executed instructions, no audio, hardware timing,
+  cache behaviour or real USB.
+
+Not run on a computer: `fx:audit`, `verify_knob_clicks.py`, a stress
+render or `perf:audit` (Modulation predates the performance record, listed
+before 7 October 2026), and `module:verify`, which skips paused modules.
