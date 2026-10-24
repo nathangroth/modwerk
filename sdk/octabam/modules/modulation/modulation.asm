@@ -1,7 +1,7 @@
 ; ---------------------------------------------------------------------------
 ; MODULATION -- a modulation pedal: JUNO, DIM, FLNG, COMB, PHSR, each a
 ; transcription of the source modules/modulation/modulation_ref.py names
-; (docs/effects/PORTS.md), proven against that float reference. Three sample
+; (modules/modulation/README.md "Sources"), proven against that float reference. Three sample
 ; loops, one chosen per block: LINE (JUNO, DIM and FLNG differ only in five
 ; per-block mix weights bl bd ff kc kb), PHSR, COMB. Insert contract
 ; (frames in place, knobs from r6, state in the r7 block). FX1 only: init reads the allocator base
@@ -67,7 +67,7 @@ init:
 moclrz:
         nop
 monoclr:
-; ---- every persistent slot to zero (verify_dirtystate) -------------------
+; ---- every persistent slot to zero (verify_dirty_state) -------------------
         clr     a
         move    r7,r5
         move    #>$ffffff,m5
@@ -391,6 +391,8 @@ mo_line:
         move    a1,n4
         move    x:(r7+$41),a
         move    a1,n1
+        move    #>$3ff,m5               ; the lines are modulo-1024 rings: every
+                                        ; FX1 base is 1024-aligned (DSP.md's table)
         do      n7,>molinz
         move    r4,r1
         lua     (r4+$25),r3             ; the steps
@@ -651,6 +653,7 @@ mo_line:
         move    (r0)+n0                 ; whole loop, so two steps, no reload
 molinz:
         nop
+        move    #>$ffffff,m5
         move    x:(r4+$23),x0           ; MIX's run value, for the next block
         move    x0,x:(r7+$22)
         move    y0,a
@@ -1031,8 +1034,9 @@ mo_bcomb:
         move    x0,a                    ; a clean load: a0 = 0 for the divide
         move    x1,x0
         andi    #$fe,ccr                ; carry clear
-        rep     #$18
+        do      #$18,>norep_md_01
         div     x0,a                    ; 24 quotient bits land in a0
+norep_md_01:
         move    a0,x0
         move    x0,a
         move    #$63,n5
@@ -1107,6 +1111,7 @@ mo_bcomb:
         move    x:(r7+$20),y0
         move    x:(r7+$41),a
         move    a1,n1
+        move    #>$3ff,m5               ; the lines as modulo-1024 rings (LINE above)
         do      n7,>mocmbz
         move    r4,r1
         lua     (r4+$e),r3              ; the steps
@@ -1253,6 +1258,7 @@ mo_bcomb:
         move    (r0)+n0
 mocmbz:
         nop
+        move    #>$ffffff,m5
         move    x:(r4+$c),x0            ; MIX's run value, for the next block
         move    x0,x:(r7+$22)
         move    y0,a
@@ -1376,12 +1382,8 @@ mo_itap:
         sub     x0,a
         and     #>$3ff,a                ; (a2 may be stale: a1 is what is read)
         move    a1,n5
-        add     #>$3ff,a                ; i + 1, mod 1024 (a1 alone, again)
-        and     #>$3ff,a
-        move    (r5)+n5                 ; -> sample i
-        move    y:(r5)-n5,b             ; t0, and back to the base
-        move    a1,n5
-        move    (r5)+n5                 ; -> sample i + 1
+        move    (r5)+n5                 ; -> delay i (r5 = the line, m5 = $3ff)
+        move    y:(r5)-,b               ; t0; the modulo steps r5 to delay i + 1
         move    y:(r5),a                ; t1
         sub     b,a                     ; t1 - t0
         move    a,x0
@@ -1413,29 +1415,16 @@ mo_herm:
         add     #>$1,a                  ; i - 1: xm1
         and     #>$3ff,a
         move    a1,n5
-        move    (r5)+n5
-        move    y:(r5)-n5,b             ; xm1, and back to the base
-        move    b,x:(r3)+
+        move    (r5)+n5                 ; -> xm1 (r5 = the line, m5 = $3ff)
+        move    y:(r5)-,b               ; xm1; each next index is the last - 1
+        move    b,x:(r3)+               ; mod 1024, by the modulo
         move    (r3)+                   ; (c's word)
-        add     #>$3ff,a                ; each next index is the last - 1 mod
-        and     #>$3ff,a                ; 1024 (a1 only: a2 is stale)
-        move    a1,n5
-        move    (r5)+n5
-        move    y:(r5)-n5,b             ; x0
+        move    y:(r5)-,b               ; x0
         move    b,x:(r3)+
-        add     #>$3ff,a
-        and     #>$3ff,a
-        move    a1,n5
-        move    (r5)+n5
-        move    y:(r5)-n5,b             ; x1
+        move    y:(r5)-,b               ; x1
         move    b,x:(r3)+
         move    (r3)+                   ; (w's word)
-        add     #>$3ff,a
-        and     #>$3ff,a
-        move    a1,n5
-        move    (r5)+n5
         move    y:(r5),b                ; x2
-        move    (r5)-n5
         move    b,x:(r3)
 ; the polynomial, /16
         move    #$2,n3

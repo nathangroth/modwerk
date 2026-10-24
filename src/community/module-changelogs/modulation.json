@@ -1,5 +1,14 @@
 [
   {
+    "version": "0.1.2-experimental",
+    "date": "2026-10-24",
+    "changes": [
+      "Brings in upstream octabam's newer Modulation code: it uses less DSP time in every mode except PHSR, and its delay loops can no longer hold up the instrument's other audio work.",
+      "The sound and the controls are meant to be unchanged; saved projects load as before.",
+      "Known issue: Modulation stays paused in the library until this version is tested on hardware and the owner reinstates it."
+    ]
+  },
+  {
     "version": "0.1.1-experimental",
     "date": "2026-10-01",
     "changes": [
