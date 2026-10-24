@@ -1,0 +1,125 @@
+{
+  "firmware": "1.40C",
+  "imageSha256": "0fb6585f9bb6dc1ae4075b5a37e42565c7a46e5516d697b5007816864b5c326c",
+  "emulatorSha256": "bb17b9eee1927b755b7a1e1a66452a8fd94d0cd5a4512d545daa0f2c2e9a3d69",
+  "setup": "Headless ot_emu; MKI panel; stopped transport; 128\u00d764 LCD at integer scale 6.",
+  "palette": {
+    "on": [
+      240,
+      240,
+      240
+    ],
+    "off": [
+      24,
+      24,
+      24
+    ]
+  },
+  "keyMs": 150,
+  "plan": [
+    {
+      "wait": 3000
+    },
+    {
+      "press": [
+        "YES"
+      ]
+    },
+    {
+      "wait": 2000
+    },
+    {
+      "press": [
+        "NO"
+      ]
+    },
+    {
+      "press": [
+        "FUNC",
+        "FX1"
+      ]
+    },
+    {
+      "encoder": {
+        "name": "LEVEL",
+        "delta": 30
+      }
+    },
+    {
+      "wait": 300
+    },
+    {
+      "capture": "ot-location.png"
+    },
+    {
+      "press": [
+        "YES"
+      ]
+    },
+    {
+      "wait": 500
+    },
+    {
+      "capture": "ot-setup.png"
+    },
+    {
+      "press": [
+        "FX1"
+      ]
+    },
+    {
+      "wait": 2500
+    },
+    {
+      "encoder": {
+        "name": "F",
+        "delta": 64
+      }
+    },
+    {
+      "wait": 300
+    },
+    {
+      "capture": "ot-controls.png"
+    },
+    {
+      "press": [
+        "FUNC",
+        "FX1"
+      ]
+    },
+    {
+      "wait": 500
+    },
+    {
+      "encoder": {
+        "name": "A",
+        "delta": 40
+      }
+    },
+    {
+      "wait": 500
+    },
+    {
+      "capture": "ot-setup-phsr.png"
+    },
+    {
+      "press": [
+        "FX1"
+      ]
+    },
+    {
+      "wait": 2500
+    },
+    {
+      "capture": "ot-controls-phsr.png"
+    }
+  ],
+  "screenshots": {
+    "ot-location.png": "7a33711a834cfa3f0e39aa7ad1d59a2165ddb803685cfc26ccfaf120c9cb67bd",
+    "ot-setup.png": "3d0059c89ec05536b723af1b24c540b18b29b01a41ca2607b02d311345d44379",
+    "ot-controls.png": "efcbe32f911cc68e92fd0230df67abb8ede722c50c7162cc93b511be3f9203a3",
+    "ot-setup-phsr.png": "17ca602da932d6c3cac3bf1f529450180be2cbeb73d030cf435ef248269400bd",
+    "ot-controls-phsr.png": "dcc31af1ef2f0e58d6a5cf77b6b9843aab15699c090ef46f222190df123ed155"
+  }
+}

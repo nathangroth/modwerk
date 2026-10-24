@@ -1,5 +1,99 @@
 # MODULATION
 
+## Overview
+
+Modulation is an FX1 effect with five modulation voices in one slot: JUNO
+(a Juno-60 style chorus), DIM (a dimension-style chorus), FLNG (a
+through-zero flanger), COMB (a tuned comb that rings like a plucked string)
+and PHSR (a 2 to 8 stage phaser). Shape the movement with RATE and DPTH,
+then set feedback, tone, stereo width and the dry/wet blend. MIX starts at
+0, so assigning it changes nothing until you turn MIX up.
+
+Version 0.1.2-experimental takes Sam Banks' newer octabam source: the same
+sound, bit for bit, at a lower DSP cost, with no uninterruptible `rep`
+loop left in its code. It also loads over USB on the Modwerk base.
+
+## Controls
+
+| page | encoder | knob | range and default | what it does |
+|---|---|---|---|---|
+| main | A | RATE | 0–127, default 26 | LFO speed, 0.08 to 10 Hz on a squared taper (26 is the Juno's 0.5 Hz). No LFO in COMB |
+| main | B | DPTH | 0–127, default 21 | how far the sweep moves either side of DLY; in PHSR, how far the LFO reaches. Unused in COMB |
+| main | C | DLY | 0–127, default 18 | the sweep's centre, 0.2 to 23 ms; COMB's pitch; PHSR's stage count (STGS: 2, 4, 6 or 8) |
+| main | D | FDBK | 0–127, default 64 | bipolar, 64 is none: feedback from the swept tap; PHSR's regeneration; COMB's decay time and polarity |
+| main | E | LOFI | 0–127, default 0 | coarser and grittier: holds and quantises the line (0 is clean) |
+| main | F | MIX | 0–127, default 0 | dry/wet; 0 is the exact dry track, 127 the effect alone |
+| SETUP | A | MODE | JUNO, DIM, FLNG, COMB, PHSR | which voice; the knob names follow the mode |
+| SETUP | B | TONE | 0–127, default 80 | the line's brightness, 0 dark (2 kHz) to 127 open; COMB's brightness; unused in PHSR (shown ---) |
+| SETUP | C | WDTH | 0–127, default 127 | stereo spread of the LFO: 0 mono, 64 quadrature, 127 antiphase. Unused in COMB |
+
+The laws behind each knob are in [The knobs](#the-knobs) below.
+
+## Usage
+
+Modulation sits in the FX1 chooser of an audio track, after the stock FX1
+effects. On a card build it is there whenever the build includes it; on the
+Modwerk base it is there once the module set that holds it is on the unit.
+
+### Quick tutorial
+
+1. Select an audio track, hold FUNC and press FX1, then turn LEVEL to Modulation and press YES.
+2. Press FX1, turn encoder F (MIX) to 64 while a sample plays, then raise encoder B (DPTH) for a deeper chorus.
+3. Hold FUNC and press FX1 and turn encoder A (MODE) to FLNG or PHSR for another voice; set MIX to 0 to hear the exact dry track again.
+
+## Compatibility and limitations
+
+- FX1 only. On an FX2 slot its code passes the track through dry by design.
+- Its own effect id (11), so stock CHORUS stays available beside it.
+- One instance per track, so up to four per DSP core (tracks 1–4 on one
+  core, 5–8 on the other). Four cost 1,320 of a core's 3,120 cycles per
+  sample at the static count; what the stock and other effects on that core
+  leave free decides the rest, and the base refuses a pick that does not fit.
+- Card builds refuse it beside Analog BD, as they do every custom DSP effect
+  not on Analog BD's reviewed list.
+- Changing MODE resets the per-sample state of the walk; the delay lines,
+  the LFO phase and the LOFI hold keep running.
+- Parts saved before ENS was removed (16 Sep 2026) read MODE 3..5 one lower;
+  see [Open](#open).
+- Paused in the Modwerk library since 1 October 2026 after reported audio
+  crackling. 0.1.2 removes the `rep` loop that Modwerk's hardware traps name
+  as a cause of torn audio; whether it ends the crackle is decided on
+  hardware and by the owner.
+
+## Tests and measurements
+
+[TESTING.md](TESTING.md) has every command and result for this version:
+bit identity with 0.1.1 on octabam's 13-setting matrix, Modulation's 26
+render gates, the static cycle counts, the package and USB-package builds,
+the emulator runs and the hardware report. In short: the same sound as
+0.1.1, LINE 330, COMB 291 and PHSR 298 cycles per sample (was 354, 329,
+298), and a 7,386-byte stock-free USB package.
+
+## Authorship and licences
+
+Modulation is Sam Banks' module from octabam
+([sambanks/octabam](https://github.com/sambanks/octabam), `modules/modulation`
+at `8250be0`). Its modes transcribe permissively licensed work: Hera
+(J.P. Cimalando, ISC), ChowPhaser (Jatin Chowdhury, BSD-3-Clause) and
+Mutable Instruments Rings (Emilie Gillet, MIT). Project code is MIT; the
+full notices are in [LICENSE](LICENSE). The import record is
+`sdk/imports/modulation-8250be0.json`.
+
+## Screens and audio
+
+Headless emulator captures of 0.1.2-experimental on the MKI panel
+([capture record](media/capture.json), [rights](media/LICENSE.md)):
+
+![FX1 SETUP, the effect list at Modulation](media/ot-location.png)
+![FX1 SETUP after YES: MODE, TONE, WDTH](media/ot-setup.png)
+![FX1 main page with MIX at 64](media/ot-controls.png)
+![FX1 SETUP in PHSR](media/ot-setup-phsr.png)
+![FX1 main page in PHSR: STGS](media/ot-controls-phsr.png)
+
+No audio previews yet.
+
+## Sources and design
+
 A modulation pedal on its own id 0x0b (stock CHORUS's 0x12 until 30 Sep 2026), FX1 only. Every mode is a
 transcription of a published, permissively licensed source; the survey,
 licences and laws are in `docs/effects/PORTS.md`.

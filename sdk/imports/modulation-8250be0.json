@@ -1,0 +1,46 @@
+{
+  "schemaVersion": 1,
+  "repository": "https://github.com/sambanks/octabam",
+  "revision": "8250be0c23ca0a0a953cb7e5721e3bdb98dadfe5",
+  "moduleVersion": "0.1.2-experimental",
+  "root": "sdk/octabam/modules/modulation",
+  "modules": [
+    "modulation"
+  ],
+  "files": [
+    {
+      "path": "modules/modulation/modulation.asm",
+      "repository": "https://github.com/sambanks/octabam",
+      "revision": "8250be0c23ca0a0a953cb7e5721e3bdb98dadfe5",
+      "sourcePath": "modules/modulation/modulation.asm",
+      "sourceBytes": 61891,
+      "sourceGitBlob": "fca0c9c030201fcdcd8e90353c7406056c6e6893",
+      "sourceSha256": "85e17f386627c0deca14612395df85c8c176e4e072949867ea0692e685c87001",
+      "vendoredSha256": "85e17f386627c0deca14612395df85c8c176e4e072949867ea0692e685c87001"
+    },
+    {
+      "path": "modules/modulation/modulation_ref.py",
+      "repository": "https://github.com/sambanks/octabam",
+      "revision": "8250be0c23ca0a0a953cb7e5721e3bdb98dadfe5",
+      "sourcePath": "modules/modulation/modulation_ref.py",
+      "sourceBytes": 16587,
+      "sourceGitBlob": "68d2bf490d6010e87722bda962d94f91e29bbd9c",
+      "sourceSha256": "769b4fa5389c28e50dbc93373c6d5ec479779163014234dfe263559ded253bd8",
+      "vendoredSha256": "769b4fa5389c28e50dbc93373c6d5ec479779163014234dfe263559ded253bd8"
+    }
+  ],
+  "excluded": [
+    "octabam's manifest.py at this revision: it puts MODULATION back on stock CHORUS's id 0x12 (replaces CHORUS) and adds the SLOTS station setting, Store and brain.lock. Modwerk keeps its own manifest.py (effect id 0x0b, FX1 only, stock CHORUS kept), whose parameters, defaults, counts and claims equal upstream's.",
+    "octabam's README.md at this revision: Modwerk keeps its own README and TESTING.md and records the upstream measurements it relies on there, with attribution.",
+    "brain.lock (octabam's settings-store lock) and the stations FX2 variant: no Modwerk counterpart.",
+    "Firmware, stock bytes and built images: never imported."
+  ],
+  "status": "Pinned DSP source. Bit-identical to 0.1.1-experimental's renders on octabam's 13-setting identity matrix (verify_ident), all 26 verify_modulation gates pass; packages rebuilt in the isolated toolchain; USB package added. Hardware: pending the contributor's MKI test.",
+  "releaseRequirements": [
+    "Source-only package generation reproduced in the pinned container",
+    "Stock-free USB package (ABI 6, FX1) reproducing byte for byte",
+    "Worst-case DSP cycles and exact memory in the qualification record",
+    "Contributor-reported functional hardware test of the exact package on an Octatrack MKI over USB",
+    "Owner review and merge; the owner decides whether Modulation leaves PAUSED_MODULE_IDS"
+  ]
+}

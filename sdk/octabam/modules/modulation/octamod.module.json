@@ -107,16 +107,17 @@
     "firmware": "1.40C",
     "location": "FX1",
     "conflicts": [],
+    "uiClaims": [],
     "limitations": [
       "The source records 29 reference gates and 13-setting identity comparisons. Image 88 overran with four Modulation instances beside reverb; the following cycle optimization has not been retested on hardware."
     ],
     "effectId": 11
   },
   "resources": {
-    "recorded": "26\u201327 Sep 2026",
+    "recorded": "26–27 Sep 2026",
     "storage": {
       "label": "DSP buffer",
-      "display": "2 \u00d7 1,024 words",
+      "display": "2 × 1,024 words",
       "value": null,
       "unit": "see display",
       "method": "static",
@@ -125,7 +126,7 @@
     },
     "processing": {
       "label": "DSP estimate",
-      "display": "298\u2013354",
+      "display": "298–354",
       "value": null,
       "unit": "see display",
       "method": "static",
@@ -147,5 +148,107 @@
     "file": "LICENSE",
     "declaration": "Project code is MIT; adapted components retain their own copyright notices and full terms in LICENSE and ../../licenses/THIRD_PARTY_NOTICES.txt. The SPDX expression covers the applicable component licences. No rights to Elektron firmware or new hardware qualification are asserted."
   },
-  "media": []
+  "media": [
+    {
+      "path": "media/ot-location.png",
+      "captureType": "emulator",
+      "caption": "Hold FUNC and press FX1, then turn LEVEL down the effect list to MODULATION. It sits after the stock FX1 effects; nothing changes until you press YES.",
+      "alt": "FX1 SETUP with the effect list scrolled to Modulation79 at the bottom, highlighted; the current FILTER's HP, LP and ENV knobs on the right.",
+      "credit": "Modwerk contributors (headless capture)",
+      "license": "LicenseRef-OT-UI-Documentation",
+      "source": "original",
+      "otUi": {
+        "page": "FX1 SETUP",
+        "shows": "location",
+        "firmware": "1.40C",
+        "moduleVersion": "0.1.2-experimental",
+        "imageSha256": "0fb6585f9bb6dc1ae4075b5a37e42565c7a46e5516d697b5007816864b5c326c",
+        "setup": "Headless ot_emu; MKI panel; stopped transport; empty scratch card; private native build of MODULATION alone with stock FX2 kept (Modwerk SDK, octabam 8250be0 source); 128×64 LCD at integer scale 6."
+      }
+    },
+    {
+      "path": "media/ot-setup.png",
+      "captureType": "emulator",
+      "caption": "Press YES to assign it. The SETUP page now shows MODE (JUNO, DIM, FLNG, COMB, PHSR) on encoder A, TONE on B and WDTH on C.",
+      "alt": "FX1 SETUP with Modulation79 selected and the MODE knob reading JUNO, beside TONE and WDTH.",
+      "credit": "Modwerk contributors (headless capture)",
+      "license": "LicenseRef-OT-UI-Documentation",
+      "source": "original",
+      "otUi": {
+        "page": "FX1 SETUP",
+        "shows": "location-and-controls",
+        "firmware": "1.40C",
+        "moduleVersion": "0.1.2-experimental",
+        "imageSha256": "0fb6585f9bb6dc1ae4075b5a37e42565c7a46e5516d697b5007816864b5c326c",
+        "setup": "Headless ot_emu; MKI panel; stopped transport; empty scratch card; private native build of MODULATION alone with stock FX2 kept (Modwerk SDK, octabam 8250be0 source); 128×64 LCD at integer scale 6."
+      }
+    },
+    {
+      "path": "media/ot-controls.png",
+      "captureType": "emulator",
+      "caption": "Press FX1 for the main page: RATE, DPTH and DLY above FDBK, LOFI and MIX. MIX starts at 0 (the dry track); here it is turned to 64 to blend in the chorus.",
+      "alt": "FX1 main page of Modulation79 with RATE, DPTH, DLY, FDBK, LOFI and MIX; MIX reads 64.",
+      "credit": "Modwerk contributors (headless capture)",
+      "license": "LicenseRef-OT-UI-Documentation",
+      "source": "original",
+      "otUi": {
+        "page": "FX1 main",
+        "shows": "controls",
+        "firmware": "1.40C",
+        "moduleVersion": "0.1.2-experimental",
+        "imageSha256": "0fb6585f9bb6dc1ae4075b5a37e42565c7a46e5516d697b5007816864b5c326c",
+        "setup": "Headless ot_emu; MKI panel; stopped transport; empty scratch card; private native build of MODULATION alone with stock FX2 kept (Modwerk SDK, octabam 8250be0 source); 128×64 LCD at integer scale 6."
+      }
+    },
+    {
+      "path": "media/ot-setup-phsr.png",
+      "captureType": "emulator",
+      "caption": "Turn MODE to choose another voice. In PHSR the page shows --- for TONE, which the phaser does not use.",
+      "alt": "FX1 SETUP with MODE reading PHSR; the second knob is labelled --- and the third WDTH.",
+      "credit": "Modwerk contributors (headless capture)",
+      "license": "LicenseRef-OT-UI-Documentation",
+      "source": "original",
+      "otUi": {
+        "page": "FX1 SETUP",
+        "shows": "controls",
+        "firmware": "1.40C",
+        "moduleVersion": "0.1.2-experimental",
+        "imageSha256": "0fb6585f9bb6dc1ae4075b5a37e42565c7a46e5516d697b5007816864b5c326c",
+        "setup": "Headless ot_emu; MKI panel; stopped transport; empty scratch card; private native build of MODULATION alone with stock FX2 kept (Modwerk SDK, octabam 8250be0 source); 128×64 LCD at integer scale 6."
+      }
+    },
+    {
+      "path": "media/ot-controls-phsr.png",
+      "captureType": "emulator",
+      "caption": "In PHSR the third knob becomes STGS, the number of phaser stages (2, 4, 6 or 8). Turn MIX up to hear it.",
+      "alt": "FX1 main page of Modulation79 in PHSR mode: RATE, DPTH, STGS above FDBK, LOFI and MIX.",
+      "credit": "Modwerk contributors (headless capture)",
+      "license": "LicenseRef-OT-UI-Documentation",
+      "source": "original",
+      "otUi": {
+        "page": "FX1 main",
+        "shows": "controls",
+        "firmware": "1.40C",
+        "moduleVersion": "0.1.2-experimental",
+        "imageSha256": "0fb6585f9bb6dc1ae4075b5a37e42565c7a46e5516d697b5007816864b5c326c",
+        "setup": "Headless ot_emu; MKI panel; stopped transport; empty scratch card; private native build of MODULATION alone with stock FX2 kept (Modwerk SDK, octabam 8250be0 source); 128×64 LCD at integer scale 6."
+      }
+    }
+  ],
+  "access": {
+    "location": "Audio track FX1 SETUP: Modulation in the effect chooser.",
+    "steps": [
+      "Select an audio track with its TRACK key.",
+      "Hold FUNC and press FX1 to open FX1 SETUP.",
+      "Turn LEVEL to Modulation and press YES to assign it; MODE, TONE and WDTH appear on the right of the SETUP page.",
+      "Press FX1 for the main page: RATE, DPTH, DLY, FDBK, LOFI and MIX. Raise MIX to hear the effect."
+    ],
+    "screenshots": [
+      "media/ot-location.png",
+      "media/ot-setup.png",
+      "media/ot-controls.png",
+      "media/ot-setup-phsr.png",
+      "media/ot-controls-phsr.png"
+    ]
+  }
 }
