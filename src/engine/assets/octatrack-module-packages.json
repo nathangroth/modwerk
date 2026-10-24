@@ -94,6 +94,25 @@
       "path": "octatrack-modules/lofi2/0.1.1-experimental.mwrm"
     },
     {
+      "id": "modulation",
+      "slots": "fx1",
+      "cycles": 330,
+      "cyclesKind": "modeled",
+      "state": 112,
+      "buffer": 2048,
+      "version": "0.1.2-experimental",
+      "name": "Modulation",
+      "module": "0d4bf9b8",
+      "bytes": 7386,
+      "sha256": "21bdc13b58a2827f4e2da39113154eb0ca459306e386979ba200c6be5ef946e9",
+      "path": "octatrack-modules/modulation/0.1.2-experimental.mwrm",
+      "abi": 6,
+      "features": 0,
+      "sites": 0,
+      "copies": 0,
+      "fills": 0
+    },
+    {
       "id": "ring-sc",
       "slots": "both",
       "cycles": 81,
