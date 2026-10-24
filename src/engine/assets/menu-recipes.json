@@ -1425,10 +1425,10 @@
       "caveLimit": 1074625596
     }
   ],
-  "sourceCommit": "a81eb5b634c2a93ef45de7e49fc103efe95d9843",
+  "sourceCommit": "09f37a255a761d59f56c9ffee9e2b4f9cf93d3bc",
   "moduleVersions": {
     "spectrum": "0.1.1-experimental",
-    "modulation": "0.1.1-experimental",
+    "modulation": "0.1.2-experimental",
     "character": "0.1.1-experimental",
     "miniverb": "0.2.3-experimental",
     "tapeecho": "0.1.5-experimental",
