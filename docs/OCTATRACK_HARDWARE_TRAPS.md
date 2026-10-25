@@ -276,6 +276,23 @@ voice limit switched off took about 34,000 DTIM3 counts (257 µs) of POLY work i
 frames stopped for good (stall record "frames stopped"). Bound what a module does per frame in the interrupt and
 measure it with DTCN3 (`0xfc07c00c`, 132 MHz, about 47,900 counts a frame); POLY8 0.3.1 sheds voices above 26,000.
 
+**One long frame does not stop the DSP; a frame interrupt that keeps the CPU does.** Measured on the owner's MKII
+(24 October 2026, development twins of the frame guard's branch, timing the interrupt from its entry `0x4000aad0` to
+its exit `0x4000d9a6`), in a bank of eight tracks trigged on every step:
+- **Each track renders about twice a frame:** the interrupt calls each track's renderer twice in most frames.
+- **Long frames pass.** Stock tracks alone ran frames up to 96 % of a frame; with POLY8 0.3.1 up to 107 %; with FM Synth
+  and USB recording up to 148 %, starting up to 69 % of a frame late. None of these stopped anything by itself.
+- **The share stops it.** POLY8 0.3.1 on T1, FM Synth 0.1.2 on T2 and six busy stock tracks kept the interrupt at 86.5 %
+  of the CPU (meter 94 %). Starting USB recording took it to 89.5 %, and the frames stopped within about 1,000 frames
+  (stall record "frames stopped", sequencer stuck on its first step). With the interrupt kept near a whole frame every
+  frame, the panel froze and USB disconnected too.
+- **The guard.** The base gives the interrupt 80 % of each frame, saving up to half a frame from short ones, and
+  renders stock's silent source for a machine track whose render would overdraw it (`machine_registry.c`). The same
+  load and recording then ran with the interrupt at 79.7 % and a clean recording, with POLY8 skipped on about half its
+  renders; POLY8 alone, sparse or on every step, was never skipped (the interrupt at 66 % and 70 %). Card builds have
+  no guard. On a development base `npm run device -- guard` reads the interrupt's share, its longest frame and the
+  skips, and `guard:MILLE` sets the share.
+
 **Uncached module code is slow in the interrupt, and so is its data.** Without `--cached-modules` every instruction
 and every load or store of a module goes to SDRAM. POLY8 0.3.0 cost about 13 points of CPU per voice there and about
 3.5 with cached module code (same day, same twin pair). Running only its tight loops from the cached alias barely
@@ -446,6 +463,20 @@ a stale instruction cache, zeros or other bytes uncached mean the push did not h
 - The track's step counter (`0x800064d0 + t`) moves one sequencer tick
   before the step's trig fires and shows 0 on the track's last step; its
   tick (`0x800064f0 + t`) reaches 1 just after the trig.
+- The LFO's output is the word at its record `0x800010e8 + 28 i` + 4
+  (i = 3 t + LFO), which the handler writes every frame: reading it over USB
+  shows a wave's values (owner's MKII, development twin `7889c57a`, 24
+  October 2026).
+- The engine runs the wave handlers inside the frame interrupt, and in FREE
+  every LFO of equally fast tracks changes in the same frame, so a wave's
+  change path and any first-use set-up add to that one interrupt. Measured
+  in `ot_emu` with 24 LFOs on Deja Vu's DJQ under a MIDI flood: the frames
+  where all 24 change took 32.9 µs more than on stock RND, and the frame
+  where all 24 set up their state took 202.9 µs against 131.8 µs.
+- In `ot_emu`, writing a Part's LFO bytes into RAM after the load does not
+  reach the engine, which reads per-track page records filled when the Part
+  loads. Write them into the bank file on the card before the load
+  (`ot_project`'s offsets, checksum fixed).
 
 **A detour returns after the whole span it displaced, never into it.** The
 map's writer detour at `0x400888c8` displaced `lea` (4 bytes) and `tstl` (2)

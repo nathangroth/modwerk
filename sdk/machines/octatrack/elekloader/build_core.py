@@ -154,6 +154,10 @@ FIELDS ={'build': 17, 'os': 17, 'modules': 4096, 'configuration': 65,
 BOOT_GATE = (0x40000412, '2e7c48000000')
 # The startup (boot_anim.s) replaces the logo loop's first instructions, `pea -1; clr.l -(%sp)`.
 BOOT_LOGO = (0x400559c6, '4878ffff42a7')
+# The frame guard (machine_registry.c): the frame interrupt's register save at its entry and its restore with rte
+# at its exit, which machine_registry.s replays around the guard's clock. Address, bytes, their SHA-256, shim.
+FRAME_SITES = ((0x4000aad0, 8, '5f02b18d204af6e4a0177ad6e41c779a698018b6f25b5d83850926c8a9d44fa2', 'mw_frame_entry'),
+               (0x4000d9a6, 10, '60acbd38c2859ac73a63948d6c58796591fdbddd654799e50e88b0940be9a37a', 'mw_frame_leave'))
 OS_FIRST, OS_VEROFF, BOOT_IMAGE_BYTES = 0x4fefffe4, 0xde648, 0x140000  # boot.s, boot.h
 BOOT_RESERVE = (0x40a955e0, 0x41495de0)  # boot.s RESERVE_LO/HI: the gate scans only there
 # REMIX SWITCH's DSP park (dsp_park.asm, assembled by Octabam's dsp_asm), by
@@ -259,9 +263,14 @@ ICON = ('.....#...#...#.....',
 # own work without effects, measured on the owner's MKII on 11 October 2026 (scripts/octatrack-measure.py: core 0 ~959,
 # it mixes; core 1 ~514; one pattern playing). The 90% ceiling is the owner's choice.
 DSP_ALLOWANCE = (3120, 3565)
-# The dearest stock effect per slot, chip cycles: DJ EQUALIZER, 342 a sample on the same unit (its 331 executed
-# instructions in the emulator, stock_dsp_worst.py, run at about one a cycle). Every slot without a module is charged it.
-DSP_RESERVE = 342
+# Each stock effect's chip cycles a sample by effect id, the dearer core at its dearest of three settings, measured on the
+# same unit (docs/OCTATRACK_ELEKLOADER_MIGRATION.md's table; DELAY runs on the ColdFire; NONE and empty ids 0). A slot is
+# charged at least the dearest of these its bank's Parts name there (dsp.c; owner, 24 October 2026, beta finding 34).
+STOCK_CYCLES = {4: 285, 5: 80, 8: 0, 12: 193, 13: 342, 16: 242, 17: 147, 18: 295, 19: 128, 20: 249, 21: 299, 22: 257,
+                24: 102, 28: 311}  # FILTER SPATIALIZER DELAY EQUALIZER DJ-EQ PHASER FLANGER CHORUS COMB PLATE SPRING DARK COMP LO-FI
+# The dearest of them, DJ EQUALIZER (its 331 executed instructions in the emulator, stock_dsp_worst.py, run at about one a
+# cycle): what a machine's voice or engine still books each slot at, since a bank change may bring any stock effect.
+DSP_RESERVE = max(STOCK_CYCLES.values())
 # Effect ids the base handles (fxids.h MODWERK_FX_IDS; docs/OCTATRACK_MORE_EFFECT_IDS.md). 32 only to bisect.
 FX_IDS = 128
 VALIDATOR_CLAMPS = (0x400023b6, 0x400023bc, 0x400023de, 0x400023e4)  # the Part validator's moveq #31, FX1 then FX2
@@ -524,7 +533,19 @@ DSP_EDITS = {
     # The switch frame runs the outgoing effect's first sub-block, then the incoming one's init and its
     # second: no instance runs twice, so no overlap charge (it would refuse stock picks beside modules).
     # Each core's sum starts at its machines' source-stage charge (dsp.c), so FX slots are admitted beside it.
-    'allocator.c': (('#include "allocator.h"\n', '#include "allocator.h"\nuint32_t modwerk_dsp_source_charge(unsigned);\n'),
+    # Each slot is charged at least the dearest stock effect its bank's Parts name there (dsp.c's floors; owner, 24 October
+    # 2026): a Part switch or a RELOAD then needs no room it was not given, and a stock pick dearer than that is admitted.
+    'allocator.c': (('#include "allocator.h"\n', '#include "allocator.h"\nuint32_t modwerk_dsp_source_charge(unsigned);\n'
+                     '/* dsp.c\'s; harnesses without it charge each slot its own effect */\n'
+                     '__attribute__((weak)) unsigned modwerk_dsp_slot_floors(const uint8_t ids[16],uint32_t least[16])\n'
+                     '{ (void)ids; for(unsigned i=0;i<16;++i) least[i]=0; return 0; }\n'),
+                    ('    if(!token || token==a->token) return DL_ALLOC_STALE;\n',
+                     '    if(!token || token==a->token) return DL_ALLOC_STALE;\n'
+                     '    uint32_t least[16]; unsigned crowded=modwerk_dsp_slot_floors(ids,least); /* 1 + a core a raised floor overfills */\n'),
+                    ('        if(pkg->cycles>a->allowance[c]-steady[c]) return DL_ALLOC_CYCLES;\n        steady[c]+=pkg->cycles;\n    }\n',
+                     '        uint32_t cost=pkg->cycles>least[i] ? pkg->cycles : least[i];\n'
+                     '        if(cost>a->allowance[c]-steady[c]) return DL_ALLOC_CYCLES;\n        steady[c]+=cost;\n    }\n'
+                     '    if(crowded) return DL_ALLOC_CYCLES;\n'),
                     ('    uint32_t steady[2]={0,0},overlap[2]={0,0};',
                      '    uint32_t steady[2]={modwerk_dsp_source_charge(0),modwerk_dsp_source_charge(1)};\n'
                      '    if(steady[0]>a->allowance[0] || steady[1]>a->allowance[1]) return DL_ALLOC_CYCLES;'),
@@ -1888,7 +1909,7 @@ def main():
         definitions += 'const struct fx_legacy modwerk_fx_legacy[] = {%s};\nconst uint32_t modwerk_fx_legacy_count = %d;\n' % (
             ', '.join('{%#xu, %d, %s}' % (int.from_bytes(hashlib.sha256(key.encode()).digest()[:4], 'big'), fx,
                                            ctext(names.get(key, key)[:15])) for fx, key in legacy), len(legacy))
-        stock_catalog = loader_dsp.catalog_c(dsp_layout, DSP_RESERVE, FX_IDS)
+        stock_catalog = loader_dsp.catalog_c(dsp_layout, STOCK_CYCLES, FX_IDS)
         stock_packed_aliases, stock_packed_deltas = {}, {}
         if args.resident_stock_hooks:
             stock_catalog, stock_packed_aliases, stock_packed_deltas = share_sparse_stock_catalog(stock_catalog, dsp_layout)
@@ -1973,6 +1994,11 @@ modwerk_retained_end:
             stock = image[addr - device.main_load:addr - device.main_load + n]
             if sha(stock) != guard:
                 raise ValueError('Stock bytes at %#x are not the ones events.json names.' % addr)
+            recipe['sites'].append(dict(addr=hex(addr), stock=stock.hex(), op='jmp', target=label))
+        for addr, n, guard, label in FRAME_SITES:
+            stock = image[addr - device.main_load:addr - device.main_load + n]
+            if sha(stock) != guard:
+                raise ValueError('The frame interrupt at %#x is not stock; review the frame guard.' % addr)
             recipe['sites'].append(dict(addr=hex(addr), stock=stock.hex(), op='jmp', target=label))
         # The tables' sites: the machine registry's and the SEQUENCER rows' (machine_registry.c/.s). 'own' sites keep
         # their stock bytes; the registry rewrites their immediates while the table changes.
