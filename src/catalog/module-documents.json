@@ -344,7 +344,7 @@
         "report": "TESTING.md",
         "summary": "0.1.2 renders bit-identical to 0.1.1 on octabam's 13-setting matrix and passes its 26 render gates; static cycles LINE 330, COMB 291, PHSR 298 per sample. Over the emulated USB the package installs and runs word for word on both DSP cores. Reported on one MKI from the card image: eight instances without audible crackle or dropouts, scene morphing and settings kept after a reboot.",
         "hardwareStatus": "reported",
-        "evidenceRevision": "09f37a255a761d59f56c9ffee9e2b4f9cf93d3bc",
+        "evidenceRevision": "2756be6958e62d73bba02db0f9556c150ebd8315",
         "gates": [
           "tools/verify/verify_modulation.py"
         ],
@@ -437,7 +437,7 @@
             "model": "MKI",
             "testedOn": "2026-10-24",
             "tester": "nathangroth",
-            "sourceRevision": "09f37a255a761d59f56c9ffee9e2b4f9cf93d3bc",
+            "sourceRevision": "2756be6958e62d73bba02db0f9556c150ebd8315",
             "imageSha256": "0fb6585f9bb6dc1ae4075b5a37e42565c7a46e5516d697b5007816864b5c326c",
             "summary": "The contributor flashed the card image of this source (stock 1.40C with Modulation alone and stock FX2 kept; version MW_MOD012, MAIN image above) on their Octatrack MKI and played for a few minutes. Modulation was selected from FX1 and worked; with an instance on all eight tracks there were no audible crackles or dropouts; scene morphing between scene locks blended smoothly, on Modulation and on stock CHORUS alike; settings persisted after a reboot.",
             "limitations": [

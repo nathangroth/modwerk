@@ -2,7 +2,7 @@
   "schema": 1,
   "revision": "b8deefc88b2c3e5f3c6158e364eb741df1924e1d",
   "license": "/licenses/octabam.txt",
-  "sourceCommit": "dfb730323a33f747b57e1bd5f78014de67e398e5",
+  "sourceCommit": "42c0b4d32c5ff787eb1a790bc655ff9963ad2a41",
   "moduleVersions": {
     "spectrum": "0.1.1-experimental",
     "modulation": "0.1.2-experimental",
