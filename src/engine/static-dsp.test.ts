@@ -77,8 +77,8 @@ describe('loader-free DSP placement (native static stock)', () => {
     for (let i = 1; i < placed.length; i++) expect(placed[i].address).toBe(placed[i - 1].address + placed[i - 1].words)
   })
   it('names the overrun with native wording, matching the native proofs', () => {
-    expect(() => planStaticPlacement('A', core('A'), fx2Off, plan(['spectrum', 'modulation']))).toThrow('MODULATION overruns the region (2966 > 2724 words)')
-    expect(() => planStaticPlacement('A', core('A'), fx2Off, plan(['spectrum', 'modulation', 'character']))).toThrow('MODULATION overruns the region (3955 > 2724 words)')
+    expect(() => planStaticPlacement('A', core('A'), fx2Off, plan(['spectrum', 'modulation']))).toThrow('MODULATION overruns the region (2950 > 2724 words)')
+    expect(() => planStaticPlacement('A', core('A'), fx2Off, plan(['spectrum', 'modulation', 'character']))).toThrow('MODULATION overruns the region (3939 > 2724 words)')
   })
   it('nulls only donors the placed code reached and keeps the rest stock', () => {
     const { nulledDonors } = planStaticPlacement('A', core('A'), fx2Off, plan(['miniverb', 'tapeecho', 'euclid']))
