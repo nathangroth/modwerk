@@ -51,6 +51,10 @@ Modwerk base it is there once the module set that holds it is on the unit.
   leave free decides the rest, and the base refuses a pick that does not fit.
 - Card builds refuse it beside Analog BD, as they do every custom DSP effect
   not on Analog BD's reviewed list.
+- Knob names follow the MODE of the track that last drew the SETUP page:
+  with T1 in COMB and T2 in JUNO, selecting T2 keeps COMB's names until you
+  open SETUP (octabam's mode names live in one descriptor shared by every
+  track). The sound always follows each track's own MODE.
 - Changing MODE resets the per-sample state of the walk; the delay lines,
   the LFO phase and the LOFI hold keep running.
 - Parts saved before ENS was removed (16 Sep 2026) read MODE 3..5 one lower;
@@ -65,7 +69,8 @@ Modwerk base it is there once the module set that holds it is on the unit.
 [TESTING.md](TESTING.md) has every command and result for this version:
 bit identity with 0.1.1 on octabam's 13-setting matrix, Modulation's 26
 render gates, the static cycle counts, the package and USB-package builds,
-the emulator runs and the hardware report. In short: the same sound as
+the emulator runs and the hardware report (one MKI, from a card image: eight
+instances without audible crackle, scenes and a reboot fine). In short: the same sound as
 0.1.1, LINE 330, COMB 291 and PHSR 298 cycles per sample (was 354, 329,
 298), and a 7,386-byte stock-free USB package.
 

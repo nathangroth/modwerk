@@ -109,39 +109,164 @@
     "conflicts": [],
     "uiClaims": [],
     "limitations": [
-      "The source records 29 reference gates and 13-setting identity comparisons. Image 88 overran with four Modulation instances beside reverb; the following cycle optimization has not been retested on hardware."
+      "FX1 only; on an FX2 slot it passes the track through dry.",
+      "Up to four instances per DSP core (one per track); 4 x 330 of 3,120 cycles per sample at the static count.",
+      "Knob names follow the MODE of the track that last drew page 2 (octabam's shared ModeView names)."
     ],
     "effectId": 11
   },
   "resources": {
-    "recorded": "26–27 Sep 2026",
+    "recorded": "24 Oct 2026",
     "storage": {
       "label": "DSP buffer",
       "display": "2 × 1,024 words",
       "value": null,
       "unit": "see display",
       "method": "static",
-      "conditions": "Per-instance delay lines in the FX1 allocator buffer. The README records an earlier 1,480-word program before the next optimization pass; current program size is not published.",
-      "source": "README.md"
+      "conditions": "Per-instance delay lines: two 1,024-word rings inside the stock FX1 slot's 3,072-word Y block, plus the 112-word state block. Program 1,559 words per DSP core.",
+      "source": "TESTING.md"
     },
     "processing": {
       "label": "DSP estimate",
-      "display": "298–354",
+      "display": "291–330",
       "value": null,
       "unit": "see display",
       "method": "static",
-      "conditions": "Priced words per sample: PHSR 298, COMB 329, LINE 354. These are estimates, not a percentage of DSP capacity.",
-      "source": "README.md"
+      "conditions": "Static words per sample in the per-sample loops: PHSR 298, COMB 291, LINE 330 (0.1.1: 298, 329, 354). Memory stalls not modelled. Not a percentage of DSP capacity.",
+      "source": "TESTING.md"
+    },
+    "impact": {
+      "conditions": "One active instance in its dearest mode (LINE: JUNO, DIM, FLNG) with moving controls; at most one per track and four per DSP core. The lines reuse the stock FX1 slot's buffer, which is not added again.",
+      "cpu": {
+        "level": "minimal",
+        "basis": "source-estimate",
+        "rationale": "No ColdFire code: a cloned FX1 descriptor and its mode-label formatter; the stock parameter pages publish the knobs as for any effect.",
+        "source": "TESTING.md"
+      },
+      "dsp": {
+        "level": "high",
+        "basis": "source-estimate",
+        "rationale": "330 instruction words per sample at the static count in the LINE loop (COMB 291, PHSR 298), down from 354 in 0.1.1, still above the 314 executed for stock SPRING REV in other modules' records. A static floor: memory stalls add to it on the chip. Four instances use 1,320 of a core's 3,120 per sample.",
+        "source": "TESTING.md"
+      },
+      "memory": {
+        "level": "moderate",
+        "basis": "source-estimate",
+        "rationale": "1,559 program words on each DSP core, a 112-word state block per instance in the existing r7 block, and two 1,024-word delay lines inside the stock FX1 slot's 3,072-word Y block: more working storage than a scalar filter, less than Mini Verb's 15,870-word ring.",
+        "source": "TESTING.md"
+      }
     }
   },
   "tests": {
     "report": "TESTING.md",
-    "summary": "The source records 29 reference gates and 13-setting identity comparisons. Image 88 overran with four Modulation instances beside reverb; the following cycle optimization has not been retested on hardware.",
-    "hardwareStatus": "historical",
-    "evidenceRevision": "b8deefc88b2c3e5f3c6158e364eb741df1924e1d",
+    "summary": "0.1.2 renders bit-identical to 0.1.1 on octabam's 13-setting matrix and passes its 26 render gates; static cycles LINE 330, COMB 291, PHSR 298 per sample. Over the emulated USB the package installs and runs word for word on both DSP cores. Reported on one MKI from the card image: eight instances without audible crackle or dropouts, scene morphing and settings kept after a reboot.",
+    "hardwareStatus": "reported",
+    "evidenceRevision": "09f37a255a761d59f56c9ffee9e2b4f9cf93d3bc",
     "gates": [
       "tools/verify/verify_modulation.py"
-    ]
+    ],
+    "qualification": {
+      "moduleVersion": "0.1.2-experimental",
+      "sourceSha256": "086c062bb4c417896cde4432756de4a6d976a0a8ad58618142b39d898e5f79c4",
+      "imageSha256": "0fb6585f9bb6dc1ae4075b5a37e42565c7a46e5516d697b5007816864b5c326c",
+      "cycles": [
+        {
+          "processor": "dsp",
+          "worstCase": 330,
+          "maxConfiguration": 1320,
+          "maxInstances": 4,
+          "budget": 3120,
+          "unit": "cycles/sample",
+          "method": "static",
+          "conditions": {
+            "parameterExtremes": "The count is the longest of the three per-sample loops (LINE 330 for JUNO, DIM and FLNG; COMB 291; PHSR 298), and each loop is straight-line code with every knob's work inside it, so no knob value or endpoint adds instructions: LOFI's hold and mask and the eight PHSR stages are priced whether used or not.",
+            "parameterModulation": "Knobs are decoded once per 16-sample block before the loop and ramped inside it; the per-block decode is outside the per-sample count. LFOs, p-locks, scene morphs and MIDI CC reach the DSP as the same knob words, so they cost nothing extra per sample.",
+            "modeSwitching": "A MODE change clears the per-sample walk once per block ($23..$3f) and picks another loop; the dearest loop is the figure. Init (zeroing $11..$46 and, on FX1, both 1,024-word lines) runs at instance start, outside the per-sample budget, as for every stock effect.",
+            "maxLoad": "FX1 only and one per track, so at most four instances per DSP core (tracks 1-4 on one core, 5-8 on the other): 4 x 330 = 1,320 of the 3,120 cycles a core spends per sample. The stock effects and other modules on the same core share the rest; the base's admission (USB) and the native placement (card) refuse what does not fit.",
+            "inputConditions": "Independent of the input: the loops do the same work on silence, full scale and feedback. Static count from tools/build/cycle_count.py (one-word instructions one cycle, two-word two); memory-contention stalls are not modelled, so the chip spends more."
+          },
+          "report": "TESTING.md"
+        }
+      ],
+      "memory": {
+        "regions": [
+          {
+            "name": "DSP program, payload A",
+            "space": "dsp-p",
+            "words": 1559,
+            "wordBits": 24,
+            "bytes": 4677,
+            "scope": "shared"
+          },
+          {
+            "name": "DSP program, payload B",
+            "space": "dsp-p",
+            "words": 1559,
+            "wordBits": 24,
+            "bytes": 4677,
+            "scope": "shared"
+          },
+          {
+            "name": "r7 state block ($00..$6f)",
+            "space": "dsp-x",
+            "words": 112,
+            "wordBits": 24,
+            "bytes": 336,
+            "scope": "instance"
+          },
+          {
+            "name": "delay lines L and R in the stock FX1 block",
+            "space": "dsp-y",
+            "words": 2048,
+            "wordBits": 24,
+            "bytes": 6144,
+            "scope": "instance"
+          }
+        ],
+        "perInstanceBytes": 6480,
+        "sharedBytes": 9354,
+        "maxInstances": 8,
+        "totalBytes": 61194,
+        "conditions": "Program: the relocatable package's 1,559 words, once per DSP core (both payloads, or each core's arena over USB). State: the 112-word r7 block every FX1 slot already has (the header's map, $00..$6f). Lines: two 1,024-word rings inside the 3,072-word Y block stock assigns to each FX1 slot, so no memory beyond stock's is allocated. No ColdFire code, tables, heap or stack of its own. Eight instances is one per track.",
+        "report": "TESTING.md"
+      },
+      "hardware": {
+        "kind": "functional",
+        "status": "reported",
+        "model": "MKI",
+        "testedOn": "2026-10-24",
+        "tester": "nathangroth",
+        "sourceRevision": "09f37a255a761d59f56c9ffee9e2b4f9cf93d3bc",
+        "imageSha256": "0fb6585f9bb6dc1ae4075b5a37e42565c7a46e5516d697b5007816864b5c326c",
+        "summary": "The contributor flashed the card image of this source (stock 1.40C with Modulation alone and stock FX2 kept; version MW_MOD012, MAIN image above) on their Octatrack MKI and played for a few minutes. Modulation was selected from FX1 and worked; with an instance on all eight tracks there were no audible crackles or dropouts; scene morphing between scene locks blended smoothly, on Modulation and on stock CHORUS alike; settings persisted after a reboot.",
+        "limitations": [
+          "One MKI, a few minutes, by the contributor; not an independent or MKII test.",
+          "Card image only: the USB package did not load on this unit (uploads stalled through its USB hub; see TESTING.md), so install, self-test, Keep, Undo and removal over USB are emulator evidence only.",
+          "Not itemised in the report: each mode's sound, knob extremes, parameter locks, LFOs, Part changes and audio quality measurements.",
+          "Knob names on the page follow the MODE of the track that last drew page 2: switching to a track in another mode shows the previous mode's names until page 2 is opened (a limit of octabam's shared ModeView names).",
+          "A first observation of MIX jumping to 0 at the crossfader's middle could not be reproduced and is put down to the scene locks set at the time."
+        ],
+        "report": "TESTING.md"
+      },
+      "documentation": {
+        "tutorial": {
+          "title": "Quick tutorial",
+          "steps": [
+            "Select an audio track, hold FUNC and press FX1, then turn LEVEL to Modulation and press YES.",
+            "Press FX1, turn encoder F (MIX) to 64 while a sample plays, then raise encoder B (DPTH) for a deeper chorus.",
+            "Hold FUNC and press FX1 and turn encoder A (MODE) to FLNG or PHSR for another voice; set MIX to 0 to hear the exact dry track again."
+          ]
+        },
+        "screenshots": [
+          "media/ot-location.png",
+          "media/ot-setup.png",
+          "media/ot-controls.png",
+          "media/ot-setup-phsr.png",
+          "media/ot-controls-phsr.png"
+        ],
+        "screenshotStyle": "black-and-white"
+      }
+    }
   },
   "license": {
     "spdx": "MIT AND ISC AND BSD-3-Clause",

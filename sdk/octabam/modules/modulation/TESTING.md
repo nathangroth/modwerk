@@ -153,6 +153,61 @@ the contributor's own stock-effects test project staged with
 - Emulator evidence only: executed instructions, no audio, hardware timing,
   cache behaviour or real USB.
 
+Sound quality (aliasing, clipping, DC, idle behaviour): not tested; `npm run fx:audit` was not run for 0.1.2. 0.1.2's output is bit-identical to 0.1.1's, so it neither improves nor worsens them.
+
 Not run on a computer: `fx:audit`, `verify_knob_clicks.py`, a stress
 render or `perf:audit` (Modulation predates the performance record, listed
 before 7 October 2026), and `module:verify`, which skips paused modules.
+
+### Card image (here)
+
+The private native image above (MODULATION alone, stock FX2 kept, MAIN
+`0fb6585f9bb6dc1ae4075b5a37e42565c7a46e5516d697b5007816864b5c326c`) packed
+into an update file with the same steps `export-composition-proofs.py` runs
+for its proofs (`tools/build/bin_decode.py` on the contributor's 1.40C `.bin`,
+`scripts/native-container-oracle.c` with octabam's `elektron-firmware-tool`
+sources, `tools/build/make_bin.py`), version `MW_MOD012`, `.bin`
+`2539846f87b01703cce4a6340b203e40f2a1603d0b66b1d26be7124bf519457b`, never
+committed. Its section 3 decompresses to the MAIN image byte for byte; the
+bootloader copy the OS re-flashes from (0x400de1e0-0x400e21e0) equals stock;
+9,116 bytes of the MAIN image differ from stock. On Modwerk's adapted
+emulator with `--frame --dsp` it boots (all ten tasks) and loads the
+contributor's test project (LOAD PROJECT handled in 14.2 s emulated).
+
+### Hardware: reported (24 October 2026)
+
+Octatrack **MKI**, OS 1.40C, tester **nathangroth** (the contributor), the
+card image above flashed with OS UPGRADE. Their report, in their words where
+quoted:
+
+- "testing for a few minutes and most things are working"; Modulation
+  selected from FX1.
+- "I put an instance on all 8 tracks and did not hear any audible crackles or
+  dropouts."
+- "The settings also persisted after a reboot."
+- Scene morphing: a first try appeared to jump MIX from 100% to 0 at the
+  crossfader's middle; on a retest it "seems to be working fine now" for
+  Modulation and for stock CHORUS with the same scene setup, and the first
+  observation could not be reproduced ("perhaps I just had a strange
+  combination of scene locks").
+- Mode names: after changing T1 to COMB, selecting T2 (in JUNO) on the same
+  FX1 page kept COMB's knob names until page 2 was opened and closed. This is
+  the documented limit of octabam's `ModeView` names (one descriptor shared
+  by every track running the effect; renamed when MODE is drawn;
+  `sdk/octabam/docs/remixer/MODULES.md`), unchanged by this release.
+
+Not reported or not tested on hardware: each mode by ear, knob extremes,
+parameter locks, LFOs, Part changes, a measured audio quality run, an MKII.
+
+### Over USB on hardware: did not load
+
+The same MKI on the beta base (`56c44acc…`), connected to macOS through a USB
+2.0 hub: IDENTIFY, DIAG, status and the frontend MCP's `device_review` worked;
+every upload stopped at its first multi-packet frame ("chunk was not
+confirmed … The device kept refusing the submission"; also with 1,000- and
+200-byte chunks, and after restarting the Mac and power-cycling the unit).
+DIAG from a fresh power-up `primes 1, completions 1`; after one attempt
+`primes 18, completions 9`, `lastReceived 48`. Nothing was installed. The
+contributor also saw USB DISK MODE fail to eject cleanly on the base. A
+direct connection was not possible, so hub, MKI and base are not told apart;
+this goes to Modwerk as a separate report, not as a Modulation defect.
