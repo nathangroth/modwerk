@@ -335,10 +335,10 @@
       ]
     }
   ],
-  "sourceCommit": "f4f1b1d23f6f255a449c602f7de4f021bbe9188a",
+  "sourceCommit": "dfb730323a33f747b57e1bd5f78014de67e398e5",
   "moduleVersions": {
     "spectrum": "0.1.1-experimental",
-    "modulation": "0.1.1-experimental",
+    "modulation": "0.1.2-experimental",
     "character": "0.1.1-experimental",
     "miniverb": "0.2.3-experimental",
     "tapeecho": "0.1.5-experimental",
